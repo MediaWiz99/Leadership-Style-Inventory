@@ -961,6 +961,9 @@
                 directive: "High",
                 supportive: "Low",
                 description: "The Directing style involves providing specific instructions and closely supervising performance. You tell people what to do, how to do it, when to do it, and then closely monitor their performance. This style is characterized by one-way communication.",
+                profileSummary: "You lead by providing clear direction and structure. You're most effective with new team members or in situations requiring decisive action and close oversight.",
+                leadershipApproach: "You set clear expectations, make decisions, communicate them directly, and monitor execution closely. You provide the structure that helps inexperienced team members succeed.",
+                situationalFit: "Best matched with enthusiastic beginners (R1) who need clear guidance, or crisis situations requiring decisive action.",
                 bestFor: "Employees who are new to a task or role, enthusiastic beginners who lack competence but have high commitment, situations requiring immediate action or crisis management.",
                 behaviors: [
                     "Provides clear, specific instructions",
@@ -981,7 +984,11 @@
                     "Doesn't develop employee decision-making skills",
                     "Can create dependency on the leader"
                 ],
-                readinessMatch: "R1: Unable and Insecure OR Unable but Confident (Enthusiastic Beginner)"
+                readinessMatch: "R1: Unable and Insecure OR Unable but Confident (Enthusiastic Beginner)",
+                swotStrength: "Provides clear structure and decisive direction when situations require it",
+                swotWeakness: "May over-direct experienced employees or stifle initiative and development",
+                swotOpportunity: "Develop coaching and supporting skills to match style to follower readiness",
+                swotThreat: "Risk of being perceived as micromanaging; may not develop team autonomy"
             },
             coaching: {
                 name: "Coaching",
@@ -992,6 +999,9 @@
                 directive: "High",
                 supportive: "High",
                 description: "The Coaching style involves explaining decisions and providing opportunity for clarification. You still provide direction, but also seek input, explain the 'why,' and support the person's development. This is a teaching-focused style with two-way communication.",
+                profileSummary: "You lead by combining direction with support and explanation. You invest in developing your team's capabilities while still providing needed guidance.",
+                leadershipApproach: "You explain decisions, seek input, encourage questions, and provide both task direction and emotional support. You balance teaching with letting people try.",
+                situationalFit: "Best matched with disillusioned learners (R2) who have some ability but are frustrated or losing motivation.",
                 bestFor: "Employees who have some competence but lack commitment, disillusioned learners who've hit obstacles, people transitioning to new responsibilities.",
                 behaviors: [
                     "Explains decisions and rationale",
@@ -1012,7 +1022,11 @@
                     "May slow down experienced team members",
                     "Requires strong communication skills"
                 ],
-                readinessMatch: "R2: Unable but Confident OR Able but Insecure (Disillusioned Learner)"
+                readinessMatch: "R2: Unable but Confident OR Able but Insecure (Disillusioned Learner)",
+                swotStrength: "Develops people while providing needed direction; builds capability and confidence",
+                swotWeakness: "Time-intensive; may over-invest in situations not requiring development focus",
+                swotOpportunity: "Master the art of knowing when to coach vs. support or delegate",
+                swotThreat: "Risk of burnout from over-investment; may slow team velocity"
             },
             supporting: {
                 name: "Supporting",
@@ -1023,6 +1037,9 @@
                 directive: "Low",
                 supportive: "High",
                 description: "The Supporting style involves sharing ideas and facilitating decision-making. You listen, provide support and encouragement, and facilitate problem-solving. The employee takes more ownership while you provide the relationship support they need.",
+                profileSummary: "You lead by empowering and encouraging. You provide emotional support and resources while letting capable team members take ownership of decisions.",
+                leadershipApproach: "You listen actively, facilitate rather than direct, provide encouragement, and help remove obstacles. You trust capability and focus on confidence-building.",
+                situationalFit: "Best matched with capable but cautious performers (R3) who have skills but need encouragement to use them independently.",
                 bestFor: "Employees who have competence but lack confidence, capable but cautious performers, people who need encouragement more than instruction.",
                 behaviors: [
                     "Listens actively and provides encouragement",
@@ -1043,7 +1060,11 @@
                     "Might be seen as indecisive by some",
                     "Requires time investment in relationships"
                 ],
-                readinessMatch: "R3: Able but Insecure OR Able but Unwilling (Capable but Cautious Performer)"
+                readinessMatch: "R3: Able but Insecure OR Able but Unwilling (Capable but Cautious Performer)",
+                swotStrength: "Builds confidence and autonomy in capable team members; strong relationships",
+                swotWeakness: "May under-direct when structure is needed; can enable avoidance",
+                swotOpportunity: "Develop ability to shift to directing/coaching when situations require",
+                swotThreat: "Risk of being perceived as too hands-off or indecisive"
             },
             delegating: {
                 name: "Delegating",
@@ -1054,6 +1075,9 @@
                 directive: "Low",
                 supportive: "Low",
                 description: "The Delegating style involves turning over responsibility for decisions and implementation. You provide minimal direction and support because the employee is both competent and confident. You trust them to perform independently.",
+                profileSummary: "You lead by empowering autonomy. You trust proven performers to work independently and provide them the space to excel without interference.",
+                leadershipApproach: "You empower decision-making, provide autonomy, stay available but not hovering, and trust team members to deliver. You monitor outcomes, not activities.",
+                situationalFit: "Best matched with self-reliant achievers (R4) who are both competent and confident in the task.",
                 bestFor: "Employees who are both competent and committed, self-reliant achievers who can work independently, proven performers on familiar tasks.",
                 behaviors: [
                     "Empowers decision-making authority",
@@ -1074,7 +1098,11 @@
                     "Assumes competence that may not exist",
                     "Can seem disengaged or uncaring"
                 ],
-                readinessMatch: "R4: Able and Confident (Self-Reliant Achiever)"
+                readinessMatch: "R4: Able and Confident (Self-Reliant Achiever)",
+                swotStrength: "Maximizes autonomy for high performers; efficient use of leadership bandwidth",
+                swotWeakness: "May under-support when team members need help; can miss early warning signs",
+                swotOpportunity: "Develop sensitivity to when delegation isn't working and intervention is needed",
+                swotThreat: "Risk of being perceived as disengaged or uncaring; may miss developing problems"
             }
         };
 
@@ -1185,6 +1213,24 @@
             const secondaryStyle = sortedStyles[1][0];
             const primary = styleData[primaryStyle];
             const secondary = styleData[secondaryStyle];
+            
+            // Calculate style clarity and orientation
+            const totalScore = scores.directing + scores.coaching + scores.supporting + scores.delegating;
+            const primaryPct = Math.round((sortedStyles[0][1] / totalScore) * 100);
+            const styleClarity = primaryPct >= 40 ? 'Strong' : primaryPct >= 30 ? 'Moderate' : 'Balanced';
+            
+            // Task vs Relationship orientation
+            const taskScore = scores.directing + scores.coaching;
+            const relationshipScore = scores.supporting + scores.delegating;
+            const directiveOrientation = taskScore > relationshipScore ? 'Task-Focused' : 'Relationship-Focused';
+            
+            // Flexibility index (how evenly distributed scores are)
+            const flexibilityIndex = 20 - (sortedStyles[0][1] - sortedStyles[3][1]);
+            const flexibilityLevel = flexibilityIndex >= 15 ? 'High' : flexibilityIndex >= 10 ? 'Moderate' : 'Low';
+            
+            // Generate tracker code
+            const styleAbbrev = { directing: 'S1', coaching: 'S2', supporting: 'S3', delegating: 'S4' };
+            const trackerCode = `LSA-${styleAbbrev[primaryStyle]}${styleAbbrev[secondaryStyle]}-${styleClarity.charAt(0)}`;
 
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = `
@@ -1214,6 +1260,61 @@
                         <div class="icon">🚀</div>
                         <h3>S4: Delegating</h3>
                         <div class="score">${scores.delegating}</div>
+                    </div>
+                </div>
+                
+                <!-- TRACKER SUMMARY SECTION -->
+                <div style="background: linear-gradient(135deg, #1a3a7a 0%, #00205B 100%); color: white; padding: 25px; border-radius: 14px; margin: 20px 0;">
+                    <h3 style="color: #C4A000; margin-bottom: 15px; font-size: 1.3em;">📋 Assessment Tracker Summary</h3>
+                    <p style="font-size: 0.9em; opacity: 0.9; margin-bottom: 15px;">Copy this information into your Assessment Tracker at the end of the semester.</p>
+                    
+                    <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 10px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <div style="font-size: 0.8em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Primary Style</div>
+                                <div style="font-size: 1.4em; font-weight: 700; color: #F5E6A3;">${primary.name} (${primary.code})</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Secondary Style</div>
+                                <div style="font-size: 1.4em; font-weight: 700; color: #F5E6A3;">${secondary.name} (${secondary.code})</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Style Clarity</div>
+                                <div style="font-size: 1.2em; font-weight: 600;">${styleClarity} (${primaryPct}%)</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Leadership Orientation</div>
+                                <div style="font-size: 1.2em; font-weight: 600;">${directiveOrientation}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px; margin-bottom: 15px;">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div>
+                                <div style="font-size: 0.8em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Flexibility Level</div>
+                                <div style="font-size: 1.1em; font-weight: 600;">${flexibilityLevel} (ability to adapt styles)</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.8em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px;">Best Match</div>
+                                <div style="font-size: 0.95em;">${primary.readinessMatch}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="background: rgba(196, 160, 0, 0.2); padding: 15px; border-radius: 8px; border-left: 4px solid #C4A000;">
+                        <div style="font-size: 0.8em; opacity: 0.8; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px;">Key Characteristics for SWOT Analysis</div>
+                        <div style="font-size: 0.95em; line-height: 1.6;">
+                            <strong>Profile:</strong> ${primary.profileSummary}<br>
+                            <strong>Approach:</strong> ${primary.leadershipApproach}<br>
+                            <strong>Situational Fit:</strong> ${primary.situationalFit}
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; padding: 12px; background: rgba(255,255,255,0.1); border-radius: 8px; font-family: monospace; font-size: 0.85em;">
+                        <span style="opacity: 0.7;">Tracker Code:</span> <strong style="color: #F5E6A3;">${trackerCode}</strong> 
+                        <span style="opacity: 0.7; margin-left: 15px;">|</span>
+                        <span style="opacity: 0.7; margin-left: 15px;">Raw:</span> <strong>S1-${scores.directing}-S2-${scores.coaching}-S3-${scores.supporting}-S4-${scores.delegating}</strong>
                     </div>
                 </div>
 
@@ -1257,6 +1358,23 @@
                             </div>
                         </div>
                         <p class="type-description">${primary.description}</p>
+                        
+                        <!-- Enhanced Profile Section -->
+                        <div style="background: linear-gradient(135deg, #fffef8 0%, #fef9e7 100%); padding: 20px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #C4A000;">
+                            <h5 style="color: var(--chapman-blue); margin-bottom: 12px;">📋 Your Leadership Profile</h5>
+                            <p style="color: var(--text-secondary); margin-bottom: 15px; line-height: 1.7;">${primary.profileSummary}</p>
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                                <div style="padding: 12px; background: rgba(0,32,91,0.05); border-radius: 8px;">
+                                    <strong style="color: var(--chapman-blue); font-size: 0.85em; text-transform: uppercase;">Leadership Approach</strong>
+                                    <p style="margin-top: 5px; font-size: 0.9em; color: var(--text-secondary);">${primary.leadershipApproach}</p>
+                                </div>
+                                <div style="padding: 12px; background: rgba(0,32,91,0.05); border-radius: 8px;">
+                                    <strong style="color: var(--chapman-blue); font-size: 0.85em; text-transform: uppercase;">Situational Fit</strong>
+                                    <p style="margin-top: 5px; font-size: 0.9em; color: var(--text-secondary);">${primary.situationalFit}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="behavior-tags">
                             <span class="behavior-tag directive">Directive: ${primary.directive}</span>
                             <span class="behavior-tag supportive">Supportive: ${primary.supportive}</span>
@@ -1283,6 +1401,30 @@
                             </div>
                         </div>
                         <p class="type-description">${secondary.description}</p>
+                    </div>
+                    
+                    <!-- SWOT Preview Section -->
+                    <div style="background: linear-gradient(135deg, var(--blue-light) 0%, #f0f4fa 100%); border-radius: 14px; padding: 25px; margin: 20px 0; border: 2px solid var(--chapman-blue);">
+                        <h4 style="color: var(--chapman-blue); margin-bottom: 15px; font-size: 1.2em;">📊 SWOT Analysis Preview (For Assessment Tracker)</h4>
+                        <p style="color: var(--text-secondary); font-size: 0.9em; margin-bottom: 15px;">This preview shows how your Leadership Style will contribute to your comprehensive SWOT analysis.</p>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                            <div style="background: #E8F5E9; padding: 15px; border-radius: 10px; border-left: 4px solid #2E7D32;">
+                                <strong style="color: #2E7D32; font-size: 0.9em;">STRENGTH</strong>
+                                <p style="font-size: 0.9em; margin-top: 5px; color: var(--text-secondary);">${primary.swotStrength}</p>
+                            </div>
+                            <div style="background: #FFEBEE; padding: 15px; border-radius: 10px; border-left: 4px solid #C62828;">
+                                <strong style="color: #C62828; font-size: 0.9em;">WEAKNESS</strong>
+                                <p style="font-size: 0.9em; margin-top: 5px; color: var(--text-secondary);">${primary.swotWeakness}</p>
+                            </div>
+                            <div style="background: #E3F2FD; padding: 15px; border-radius: 10px; border-left: 4px solid #1565C0;">
+                                <strong style="color: #1565C0; font-size: 0.9em;">OPPORTUNITY</strong>
+                                <p style="font-size: 0.9em; margin-top: 5px; color: var(--text-secondary);">${primary.swotOpportunity}</p>
+                            </div>
+                            <div style="background: #FFF3E0; padding: 15px; border-radius: 10px; border-left: 4px solid #E65100;">
+                                <strong style="color: #E65100; font-size: 0.9em;">THREAT</strong>
+                                <p style="font-size: 0.9em; margin-top: 5px; color: var(--text-secondary);">${primary.swotThreat}</p>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="readiness-section">
