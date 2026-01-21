@@ -1538,132 +1538,324 @@
             const primary = styleData[primaryStyle];
             const secondary = styleData[secondaryStyle];
 
+            // Colors
             const chapmanBlue = [0, 32, 91];
             const chapmanGold = [196, 160, 0];
             const textDark = [26, 26, 46];
             const textMuted = [100, 100, 110];
+            const greenColor = [46, 125, 50];
+            const redColor = [198, 40, 40];
+            const blueColor = [21, 101, 192];
+            const orangeColor = [230, 81, 0];
 
-            // Header
-            doc.setFillColor(...chapmanBlue);
-            doc.rect(0, 0, 210, 45, 'F');
+            // Calculate tracker metrics
+            const totalScore = scores.directing + scores.coaching + scores.supporting + scores.delegating;
+            const primaryPct = Math.round((scores[primaryStyle] / totalScore) * 100);
+            const styleClarity = primaryPct >= 40 ? 'Strong' : primaryPct >= 30 ? 'Moderate' : 'Balanced';
+            const taskScore = scores.directing + scores.coaching;
+            const relationshipScore = scores.supporting + scores.delegating;
+            const orientation = taskScore > relationshipScore ? 'Task-Focused' : 'Relationship-Focused';
+            const flexIndex = 20 - (Math.max(...Object.values(scores)) - Math.min(...Object.values(scores)));
+            const flexibility = flexIndex >= 15 ? 'High' : flexIndex >= 10 ? 'Moderate' : 'Low';
+            const styleAbbrev = { directing: 'S1', coaching: 'S2', supporting: 'S3', delegating: 'S4' };
+            const trackerCode = 'LSA-' + styleAbbrev[primaryStyle] + styleAbbrev[secondaryStyle] + '-' + styleClarity.charAt(0);
+
+            // Helper function to add text with word wrap
+            function addWrappedText(text, x, startY, maxWidth, lineHeight) {
+                const lines = doc.splitTextToSize(text, maxWidth);
+                let currentY = startY;
+                lines.forEach(function(line) {
+                    if (currentY > 275) { doc.addPage(); currentY = 20; }
+                    doc.text(line, x, currentY);
+                    currentY += lineHeight;
+                });
+                return currentY;
+            }
+
+            // ===== PAGE 1: Header and Primary Style Overview =====
+            doc.setFillColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.rect(0, 0, 210, 42, 'F');
             doc.setFontSize(10);
             doc.setTextColor(255, 255, 255);
             doc.text('CHAPMAN UNIVERSITY', 105, 12, { align: 'center' });
             doc.setFontSize(9);
-            doc.setTextColor(...chapmanGold);
+            doc.setTextColor(chapmanGold[0], chapmanGold[1], chapmanGold[2]);
             doc.text('Argyros College of Business and Economics', 105, 18, { align: 'center' });
-            doc.setFontSize(18);
+            doc.setFontSize(16);
             doc.setTextColor(255, 255, 255);
-            doc.text('Leadership Style Assessment', 105, 30, { align: 'center' });
-            doc.setFontSize(10);
-            doc.text('Based on Situational Leadership Theory', 105, 38, { align: 'center' });
-            doc.setFillColor(...chapmanGold);
-            doc.rect(0, 45, 210, 2, 'F');
+            doc.text('Leadership Style Assessment', 105, 28, { align: 'center' });
+            doc.setFontSize(9);
+            doc.text('Based on Situational Leadership Theory', 105, 36, { align: 'center' });
+            doc.setFillColor(chapmanGold[0], chapmanGold[1], chapmanGold[2]);
+            doc.rect(0, 42, 210, 2, 'F');
 
-            let y = 55;
-            doc.setFontSize(11);
-            doc.setTextColor(...textDark);
-            doc.text(`Student: ${studentName}`, 20, y);
-            doc.text(`Date: ${new Date(surveyDate).toLocaleDateString()}`, 120, y);
+            let y = 52;
+
+            // Student Info
+            doc.setFontSize(10);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            doc.text('Student: ' + studentName, 20, y);
+            doc.text('Date: ' + new Date(surveyDate).toLocaleDateString(), 140, y);
             y += 10;
 
-            // Scores
-            doc.setFontSize(9);
-            doc.setTextColor(...textMuted);
-            doc.text(`Scores: Directing: ${scores.directing} | Coaching: ${scores.coaching} | Supporting: ${scores.supporting} | Delegating: ${scores.delegating}`, 20, y);
-            y += 12;
-
-            // Primary Style
-            doc.setFillColor(...chapmanBlue);
-            doc.roundedRect(20, y, 170, 15, 3, 3, 'F');
-            doc.setFontSize(12);
+            // Primary Style Banner
+            doc.setFillColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.roundedRect(20, y, 170, 16, 2, 2, 'F');
+            doc.setFontSize(13);
             doc.setTextColor(255, 255, 255);
-            doc.text(`PRIMARY: ${primary.name.toUpperCase()} (${primary.code}) ${primary.icon}`, 105, y + 10, { align: 'center' });
+            doc.text('PRIMARY STYLE: ' + primary.name.toUpperCase() + ' (' + primary.code + ')', 105, y + 11, { align: 'center' });
             y += 22;
 
-            doc.setFontSize(11);
-            doc.setTextColor(...chapmanGold);
-            doc.text(`${primary.subtitle}`, 105, y, { align: 'center' });
-            y += 8;
-
             doc.setFontSize(10);
-            doc.setTextColor(...textMuted);
-            doc.text(`Secondary: ${secondary.name} (${secondary.code})`, 105, y, { align: 'center' });
-            y += 12;
-
-            // Description
+            doc.setTextColor(chapmanGold[0], chapmanGold[1], chapmanGold[2]);
+            doc.text(primary.subtitle, 105, y, { align: 'center' });
+            y += 6;
             doc.setFontSize(9);
-            doc.setTextColor(...textDark);
-            const descLines = doc.splitTextToSize(primary.description, 170);
-            descLines.forEach(line => { doc.text(line, 20, y); y += 5; });
+            doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+            doc.text('Secondary Style: ' + secondary.name + ' (' + secondary.code + ')', 105, y, { align: 'center' });
+            y += 10;
+
+            // Score Distribution Box
+            doc.setFillColor(245, 247, 250);
+            doc.roundedRect(20, y, 170, 28, 2, 2, 'F');
+            doc.setFontSize(9);
+            doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.text('SCORE DISTRIBUTION', 25, y + 7);
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            doc.text('S1 Directing: ' + scores.directing + '/20', 25, y + 15);
+            doc.text('S2 Coaching: ' + scores.coaching + '/20', 80, y + 15);
+            doc.text('S3 Supporting: ' + scores.supporting + '/20', 135, y + 15);
+            doc.text('S4 Delegating: ' + scores.delegating + '/20', 25, y + 23);
+            doc.text('Clarity: ' + styleClarity + ' (' + primaryPct + '%)', 80, y + 23);
+            doc.text('Orientation: ' + orientation, 135, y + 23);
+            y += 34;
+
+            // Tracker Code Box
+            doc.setFillColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.roundedRect(20, y, 170, 10, 2, 2, 'F');
+            doc.setFontSize(8);
+            doc.setTextColor(255, 255, 255);
+            doc.text('Tracker: ' + trackerCode + '  |  Raw: S1-' + scores.directing + '-S2-' + scores.coaching + '-S3-' + scores.supporting + '-S4-' + scores.delegating + '  |  Flexibility: ' + flexibility, 105, y + 7, { align: 'center' });
+            y += 16;
+
+            // Profile Summary
+            doc.setFontSize(10);
+            doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.text('YOUR LEADERSHIP PROFILE', 20, y);
+            y += 6;
+            doc.setFontSize(9);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            y = addWrappedText(primary.profileSummary, 20, y, 170, 4.5);
+            y += 4;
+
+            // Leadership Approach
+            doc.setFontSize(10);
+            doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.text('Leadership Approach', 20, y);
+            y += 5;
+            doc.setFontSize(9);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            y = addWrappedText(primary.leadershipApproach, 20, y, 170, 4.5);
+            y += 4;
+
+            // Situational Fit
+            doc.setFontSize(10);
+            doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.text('Situational Fit', 20, y);
+            y += 5;
+            doc.setFontSize(9);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            y = addWrappedText(primary.situationalFit, 20, y, 170, 4.5);
+            y += 4;
+
+            // Key Behaviors
+            doc.setFontSize(10);
+            doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.text('Key Leadership Behaviors', 20, y);
+            y += 5;
+            doc.setFontSize(9);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            primary.behaviors.forEach(function(b) {
+                if (y > 275) { doc.addPage(); y = 20; }
+                doc.text('- ' + b, 25, y);
+                y += 4.5;
+            });
+            y += 4;
+
+            // When to Use / Caution side by side
+            doc.setFontSize(10);
+            doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
+            doc.text('When to Use This Style', 20, y);
+            doc.setTextColor(redColor[0], redColor[1], redColor[2]);
+            doc.text('Use With Caution', 115, y);
+            y += 5;
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            const maxItems = Math.max(primary.whenToUse.length, primary.caution.length);
+            for (let i = 0; i < maxItems; i++) {
+                if (y > 275) { doc.addPage(); y = 20; }
+                if (primary.whenToUse[i]) {
+                    const whenLines = doc.splitTextToSize('- ' + primary.whenToUse[i], 85);
+                    whenLines.forEach(function(line) { doc.text(line, 22, y); y += 4; });
+                    y -= 4 * whenLines.length;
+                }
+                if (primary.caution[i]) {
+                    const cautionLines = doc.splitTextToSize('- ' + primary.caution[i], 85);
+                    cautionLines.forEach(function(line, idx) { doc.text(line, 117, y + (idx * 4)); });
+                }
+                y += 8;
+            }
+
+            // ===== PAGE 2: SWOT Analysis =====
+            doc.addPage();
+            y = 20;
+
+            // SWOT Header
+            doc.setFillColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.roundedRect(20, y, 170, 10, 2, 2, 'F');
+            doc.setFontSize(11);
+            doc.setTextColor(255, 255, 255);
+            doc.text('SWOT ANALYSIS - ' + primary.name + ' Leadership Style', 105, y + 7, { align: 'center' });
+            y += 18;
+
+            // SWOT Grid - 2x2
+            const boxW = 82;
+            const boxH = 32;
+
+            // Strength Box
+            doc.setFillColor(232, 245, 233);
+            doc.roundedRect(20, y, boxW, boxH, 2, 2, 'F');
+            doc.setDrawColor(greenColor[0], greenColor[1], greenColor[2]);
+            doc.setLineWidth(0.5);
+            doc.line(20, y, 20, y + boxH);
+            doc.setFontSize(9);
+            doc.setTextColor(greenColor[0], greenColor[1], greenColor[2]);
+            doc.text('STRENGTH', 25, y + 7);
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            const sLines = doc.splitTextToSize(primary.swotStrength, boxW - 10);
+            sLines.forEach(function(line, i) { if (i < 4) doc.text(line, 25, y + 13 + (i * 4)); });
+
+            // Weakness Box
+            doc.setFillColor(255, 235, 238);
+            doc.roundedRect(108, y, boxW, boxH, 2, 2, 'F');
+            doc.setDrawColor(redColor[0], redColor[1], redColor[2]);
+            doc.line(108, y, 108, y + boxH);
+            doc.setFontSize(9);
+            doc.setTextColor(redColor[0], redColor[1], redColor[2]);
+            doc.text('WEAKNESS', 113, y + 7);
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            const wLines = doc.splitTextToSize(primary.swotWeakness, boxW - 10);
+            wLines.forEach(function(line, i) { if (i < 4) doc.text(line, 113, y + 13 + (i * 4)); });
+
+            y += boxH + 5;
+
+            // Opportunity Box
+            doc.setFillColor(227, 242, 253);
+            doc.roundedRect(20, y, boxW, boxH, 2, 2, 'F');
+            doc.setDrawColor(blueColor[0], blueColor[1], blueColor[2]);
+            doc.line(20, y, 20, y + boxH);
+            doc.setFontSize(9);
+            doc.setTextColor(blueColor[0], blueColor[1], blueColor[2]);
+            doc.text('OPPORTUNITY', 25, y + 7);
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            const oLines = doc.splitTextToSize(primary.swotOpportunity, boxW - 10);
+            oLines.forEach(function(line, i) { if (i < 4) doc.text(line, 25, y + 13 + (i * 4)); });
+
+            // Threat Box
+            doc.setFillColor(255, 243, 224);
+            doc.roundedRect(108, y, boxW, boxH, 2, 2, 'F');
+            doc.setDrawColor(orangeColor[0], orangeColor[1], orangeColor[2]);
+            doc.line(108, y, 108, y + boxH);
+            doc.setFontSize(9);
+            doc.setTextColor(orangeColor[0], orangeColor[1], orangeColor[2]);
+            doc.text('THREAT', 113, y + 7);
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            const tLines = doc.splitTextToSize(primary.swotThreat, boxW - 10);
+            tLines.forEach(function(line, i) { if (i < 4) doc.text(line, 113, y + 13 + (i * 4)); });
+
+            y += boxH + 15;
+
+            // Situational Leadership Model
+            doc.setFontSize(11);
+            doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.text('SITUATIONAL LEADERSHIP MODEL', 20, y);
             y += 8;
 
-            // When to Use
-            doc.setFontSize(11);
-            doc.setTextColor(...chapmanBlue);
-            doc.text('When to Use This Style', 20, y);
-            y += 7;
             doc.setFontSize(9);
-            doc.setTextColor(...textDark);
-            primary.whenToUse.forEach(w => {
-                if (y > 270) { doc.addPage(); y = 20; }
-                const lines = doc.splitTextToSize(`• ${w}`, 165);
-                lines.forEach(line => { doc.text(line, 25, y); y += 5; });
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            doc.text('Match your leadership style to employee readiness level:', 20, y);
+            y += 8;
+
+            const readinessData = [
+                { level: 'R1: Unable & Insecure', style: 'S1: Directing', desc: 'Provide specific instructions and close supervision' },
+                { level: 'R2: Unable but Willing', style: 'S2: Coaching', desc: 'Explain decisions and provide opportunity for clarification' },
+                { level: 'R3: Able but Insecure', style: 'S3: Supporting', desc: 'Share ideas and facilitate in decision-making' },
+                { level: 'R4: Able & Confident', style: 'S4: Delegating', desc: 'Turn over responsibility for decisions and implementation' }
+            ];
+
+            doc.setFontSize(8);
+            readinessData.forEach(function(r) {
+                doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+                doc.text(r.level + ' --> ' + r.style, 25, y);
+                doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+                y = addWrappedText(r.desc, 95, y, 95, 4);
+                y += 2;
             });
             y += 8;
 
-            // Readiness Match
-            if (y > 220) { doc.addPage(); y = 20; }
-            doc.setFontSize(11);
-            doc.setTextColor(...chapmanBlue);
-            doc.text('Matching Style to Employee Readiness', 20, y);
-            y += 7;
+            // Your Best Match
+            doc.setFillColor(255, 254, 245);
+            doc.setDrawColor(chapmanGold[0], chapmanGold[1], chapmanGold[2]);
+            doc.roundedRect(20, y, 170, 18, 2, 2, 'FD');
             doc.setFontSize(9);
-            doc.setTextColor(...textDark);
-            const readinessInfo = [
-                'R1 (Unable & Insecure) → S1: Directing',
-                'R2 (Unable but Willing) → S2: Coaching',
-                'R3 (Able but Insecure) → S3: Supporting',
-                'R4 (Able & Confident) → S4: Delegating'
-            ];
-            readinessInfo.forEach(r => { doc.text(`• ${r}`, 25, y); y += 6; });
-            y += 10;
+            doc.setTextColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
+            doc.text('Your Best Match:', 25, y + 7);
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            const matchLines = doc.splitTextToSize(primary.readinessMatch, 155);
+            matchLines.forEach(function(line, i) { doc.text(line, 25, y + 12 + (i * 4)); });
+            y += 26;
 
-            // Reflection
-            if (y > 200) { doc.addPage(); y = 20; }
-            doc.setFillColor(...chapmanBlue);
+            // Reflection Questions
+            doc.setFillColor(chapmanBlue[0], chapmanBlue[1], chapmanBlue[2]);
             doc.roundedRect(20, y, 170, 10, 2, 2, 'F');
             doc.setFontSize(10);
             doc.setTextColor(255, 255, 255);
             doc.text('REFLECTION QUESTIONS', 105, y + 7, { align: 'center' });
-            y += 18;
+            y += 16;
 
             const reflectionQs = [
-                'Think of a team member. What is their readiness level? Are you using the right style?',
-                'What style do you overuse? What style do you avoid? Why?',
-                'How might your default style be perceived by employees at different readiness levels?',
-                'What actions can you take to develop flexibility in your least-used styles?'
+                'Think of a team member you work with. What is their readiness level? Are you using the appropriate leadership style with them?',
+                'What style do you tend to overuse? What style do you avoid? Why might that be?',
+                'How might your default leadership style be perceived by employees at different readiness levels?',
+                'Describe a situation where you used the wrong leadership style. What was the outcome?',
+                'What specific actions can you take to develop flexibility in your least-used styles?'
             ];
-            doc.setFontSize(9);
-            doc.setTextColor(...textDark);
-            reflectionQs.forEach((q, i) => {
-                if (y > 270) { doc.addPage(); y = 20; }
-                const lines = doc.splitTextToSize(`${i + 1}. ${q}`, 165);
-                lines.forEach(line => { doc.text(line, 25, y); y += 5; });
-                y += 4;
+            doc.setFontSize(8);
+            doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+            reflectionQs.forEach(function(q, i) {
+                if (y > 275) { doc.addPage(); y = 20; }
+                const qLines = doc.splitTextToSize((i + 1) + '. ' + q, 165);
+                qLines.forEach(function(line) { doc.text(line, 25, y); y += 4; });
+                y += 3;
             });
 
-            // Footer
+            // Footer on all pages
             const pageCount = doc.internal.getNumberOfPages();
             for (let i = 1; i <= pageCount; i++) {
                 doc.setPage(i);
                 doc.setFontSize(8);
-                doc.setTextColor(...textMuted);
-                doc.text(`Page ${i} of ${pageCount}`, 105, 287, { align: 'center' });
-                doc.text('Chapman University • Argyros College of Business and Economics • MGMT 316', 105, 292, { align: 'center' });
+                doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+                doc.text('Page ' + i + ' of ' + pageCount, 105, 287, { align: 'center' });
+                doc.text('Chapman University - Argyros College of Business and Economics - MGMT 316', 105, 292, { align: 'center' });
             }
 
-            doc.save(`Leadership_Style_Assessment_${studentName.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save('Leadership_Style_Assessment_' + studentName.replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf');
         }
 
         function restartAssessment() {
