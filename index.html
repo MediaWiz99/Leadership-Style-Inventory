@@ -746,6 +746,14 @@
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script>
+    // Fallback: if jsPDF didn't load from primary CDN, try alternate
+    if (!window.jspdf) {
+        var s = document.createElement('script');
+        s.src = 'https://unpkg.com/jspdf@2.5.1/dist/jspdf.umd.min.js';
+        document.head.appendChild(s);
+    }
+    </script>
+    <script>
         // Leadership scenarios with 4 response options mapping to S1-S4
         const questions = [
             {
@@ -1597,6 +1605,19 @@
         }
 
         function generatePDF() {
+            // Check if jsPDF is loaded
+            if (!window.jspdf || !window.jspdf.jsPDF) {
+                alert('PDF library is still loading. Please wait a moment and try again.\n\nIf this persists, try refreshing the page or check that your browser allows scripts from cdnjs.cloudflare.com.');
+                return;
+            }
+
+            // Show loading indicator
+            var btn = document.querySelector('#downloadSection .btn-secondary');
+            var originalText = btn.textContent;
+            btn.textContent = 'Generating PDF...';
+            btn.disabled = true;
+
+            try {
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
             const { scores, primaryStyle, secondaryStyle } = window.leadershipResults;
@@ -2022,6 +2043,18 @@
             }
 
             doc.save('Leadership_Style_Assessment_' + studentName.replace(/\s+/g, '_') + '_' + new Date().toISOString().split('T')[0] + '.pdf');
+
+            } catch(e) {
+                console.error('PDF generation error:', e);
+                alert('Error generating PDF: ' + e.message + '\n\nPlease try refreshing the page and generating again.');
+            } finally {
+                // Restore button
+                var btn = document.querySelector('#downloadSection .btn-secondary');
+                if (btn) {
+                    btn.textContent = originalText || 'Download PDF Report';
+                    btn.disabled = false;
+                }
+            }
         }
 
         function restartAssessment() {
